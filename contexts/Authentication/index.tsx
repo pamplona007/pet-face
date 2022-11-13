@@ -1,63 +1,100 @@
-import React, { createContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useState } from 'react';
+
 import {
-    getAuth,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     User,
-    signOut
-} from "firebase/auth";
-import { AuthContextProps, AuthStorageProps, LogIn, SignUp } from '../../types';
-import { app } from '../../services/firebase';
+    signOut,
+} from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+
+import { auth, firestore } from '../../services/firebase';
+import { AuthContextProps, AuthStorageProps, LogIn, SignUp, UserContext, UserProfile } from '../../types';
 
 export const AuthenticationContext = createContext<AuthContextProps>({} as AuthContextProps);
 
 const AuthenticationStorage: React.FC<AuthStorageProps> = ({ children }) => {
-    const auth = useMemo(() => getAuth(app), []);
-    const [user, setUser] = useState<User | null>(null);
-    const [error, setError] = useState(null);
+    const [user, setUser] = useState<UserContext | null>(null);
+    const [error, setError] = useState<unknown>(null);
+    const [hasInitialized, setHasInitialized] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const checkUserProfile: (user: User, profile?: Partial<UserProfile>) => Promise<UserProfile | undefined> = async (user, profile) => {
+        const userRef = doc(firestore, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+
+        if (!userDoc.exists()) {
+            await setDoc(userRef, profile || {});
+            return profile;
+        }
+
+        return userDoc.data() as UserProfile;
+    };
+
+    const updateCurrentUser: (user: User, profile?: Partial<UserProfile>) => Promise<UserContext> = useCallback(async (user, profile) => {
+        const currentProfile = await checkUserProfile(user, profile);
+
+        const newUser = {
+            user,
+            profile: currentProfile,
+        };
+
+        setUser(newUser);
+
+        return newUser;
+    }, []);
 
     const logIn = async ({ email, password }: LogIn) => {
+        setIsLoading(true);
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password)
-            setUser(userCredential.user);
-            return userCredential.user;
-        } catch (error: any) {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            return await updateCurrentUser(userCredential.user);
+        } catch (error: unknown) {
             setError(error);
-            throw new Error(error);
+            throw new Error();
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const logOut = async () => {
+        setIsLoading(true);
         try {
             await signOut(auth);
             setUser(null);
-        } catch (error: any) {
+        } catch (error: unknown) {
             setError(error);
-            throw new Error(error);
+            throw new Error();
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const createUser = async ({ email, password }: SignUp) => {
+    const createUser = async ({ email, password }: SignUp, profile?: Partial<UserProfile>) => {
+        setIsLoading(true);
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-            setUser(userCredential.user);
-            return userCredential.user;
-        } catch (error: any) {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            return await updateCurrentUser(userCredential.user, profile);
+        } catch (error: unknown) {
             setError(error);
-            throw new Error(error);
+            throw new Error();
+        } finally {
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
+            setHasInitialized(true);
+
             if (user) {
-                setUser(user);
+                void updateCurrentUser(user);
             } else {
                 setUser(null);
             }
         });
-    }, [auth]);
+    }, [updateCurrentUser]);
 
     return (
         <AuthenticationContext.Provider
@@ -66,7 +103,9 @@ const AuthenticationStorage: React.FC<AuthStorageProps> = ({ children }) => {
                 logIn,
                 createUser,
                 user,
-                error
+                error,
+                hasInitialized,
+                isLoading,
             }}
         >
             {children}

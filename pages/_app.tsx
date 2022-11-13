@@ -1,11 +1,17 @@
-import 'styles/styles.scss'
-import type { AppProps } from 'next/app'
-import AuthenticationStorage from '../contexts/Authentication'
+import 'styles/styles.scss';
+import type { AppProps } from 'next/app';
 
-export default function App({ Component, pageProps }: AppProps) {
-  return (
-    <AuthenticationStorage>
-      <Component {...pageProps} />
-    </AuthenticationStorage>
-  )
-}
+import Layout from '../components/Layout';
+import AuthenticationStorage from '../contexts/Authentication';
+
+const App = ({ Component, pageProps }: AppProps) => {
+    return (
+        <AuthenticationStorage>
+            <Layout>
+                <Component {...pageProps} />
+            </Layout>
+        </AuthenticationStorage>
+    );
+};
+
+export default App;

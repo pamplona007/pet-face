@@ -1,3 +1,5 @@
+import { forwardRef } from 'react';
+
 import classNames from 'classnames';
 
 type Props = {
@@ -7,30 +9,36 @@ type Props = {
     children: React.ReactNode;
     onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     type?: 'button' | 'submit' | 'reset';
+    role?: string;
 };
 
-const Button: React.FC<Props> = ({
-    secondary,
-    children,
-    className,
-    ...other
-}) => {
+const Button = forwardRef<HTMLButtonElement, Props>((props, ref) => {
+    const {
+        secondary,
+        children,
+        className,
+        ...other
+    } = props;
+
     const buttonStyle = classNames(
         'button',
         {
             '-secondary': secondary,
         },
-        className
+        className,
     );
 
     return (
         <button
             className={buttonStyle}
+            ref={ref}
             {...other}
         >
             {children}
         </button>
     );
-};
+});
+
+Button.displayName = 'Button';
 
 export default Button;

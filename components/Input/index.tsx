@@ -8,7 +8,6 @@ type Props = {
     name: string;
     type?: string;
     labelClassName?: string;
-    bordered?: boolean;
     secondary?: boolean;
     required?: boolean;
     placeholder?: string;
@@ -27,7 +26,6 @@ const Input: React.FC<Props> = (props) => {
         labelClassName,
         wrapperClassName,
         className,
-        bordered,
         secondary,
         name,
         required,
@@ -42,7 +40,7 @@ const Input: React.FC<Props> = (props) => {
             '-primary': !secondary,
             '-error': error,
         },
-        className
+        className,
     );
 
     useEffect(() => {
@@ -69,9 +67,9 @@ const Input: React.FC<Props> = (props) => {
                         className={classNames(
                             'label-text',
                             {
-                                'required': required,
+                                required: required,
                             },
-                            labelClassName
+                            labelClassName,
                         )}
                     >
                         {label}
@@ -84,7 +82,7 @@ const Input: React.FC<Props> = (props) => {
                     defaultValue={defaultValue}
                     {...other}
                 />
-                {error && <p className='error'>{error}</p>}
+                {error && <p className={'error'}>{error}</p>}
             </label>
         </div>
     );

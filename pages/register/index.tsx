@@ -1,6 +1,8 @@
+import { useContext, useRef } from 'react';
+
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
-import { useContext, useRef, useState } from 'react';
+
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import { AuthenticationContext } from '../../contexts/Authentication';
@@ -17,7 +19,7 @@ const Login = () => {
             await createUser({
                 email: email.toLowerCase(),
                 password,
-                name
+                name,
             });
         } catch (error) {
             console.log(error);
@@ -31,35 +33,35 @@ const Login = () => {
             <Form
                 ref={formRef}
                 onSubmit={onFormSubmit}
-                className="w-80 py-4 mx-auto"
+                className={'w-80 py-4 mx-auto'}
             >
                 <Input
                     label={t('email')}
-                    name='email'
-                    type='email'
-                    autoComplete="email"
+                    name={'email'}
+                    type={'email'}
+                    autoComplete={'email'}
                 />
                 <Input
                     label={t('password')}
-                    name='password'
-                    type='password'
-                    autoComplete="password"
+                    name={'password'}
+                    type={'password'}
+                    autoComplete={'password'}
                 />
                 <Input
                     label={t('name')}
-                    name='name'
-                    autoComplete="name"
+                    name={'name'}
+                    autoComplete={'name'}
                 />
 
                 <Button
-                    type="submit"
-                    className="w-80 my-4"
+                    type={'submit'}
+                    className={'w-80 my-4'}
                 >
                     {t('login.connect')}
                 </Button>
             </Form>
         </main>
     );
-}
+};
 
 export default Login;

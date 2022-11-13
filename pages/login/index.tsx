@@ -1,6 +1,8 @@
+import { useContext, useRef } from 'react';
+
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
-import { useContext, useRef, useState } from 'react';
+
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import { AuthenticationContext } from '../../contexts/Authentication';
@@ -12,10 +14,10 @@ const Login = () => {
     } = useContext(AuthenticationContext);
     const formRef = useRef<FormHandles>(null);
 
-    const onFormSubmit = async ({ email, password }: LogIn) => {
+    const onFormSubmit = ({ email, password }: LogIn) => {
         logIn({
             email: email.toLowerCase(),
-            password: password
+            password: password,
         });
     };
 
@@ -26,30 +28,30 @@ const Login = () => {
             <Form
                 ref={formRef}
                 onSubmit={onFormSubmit}
-                className="w-80 py-4 mx-auto"
+                className={'w-80 py-4 mx-auto'}
             >
                 <Input
                     label={t('email')}
-                    name='email'
-                    type='email'
-                    autoComplete="email"
+                    name={'email'}
+                    type={'email'}
+                    autoComplete={'email'}
                 />
                 <Input
                     label={t('password')}
-                    name='password'
-                    type='password'
-                    autoComplete="password"
+                    name={'password'}
+                    type={'password'}
+                    autoComplete={'password'}
                 />
 
                 <Button
-                    type="submit"
-                    className="w-80 my-4"
+                    type={'submit'}
+                    className={'w-80 my-4'}
                 >
                     {t('login.connect')}
                 </Button>
             </Form>
         </main>
     );
-}
+};
 
 export default Login;

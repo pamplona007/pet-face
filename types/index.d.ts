@@ -1,3 +1,5 @@
+import { User } from 'firebase/auth';
+
 export {};
 
 declare global {
@@ -24,10 +26,23 @@ export type SignUp = {
     name: string;
 }
 
-export type AuthContextProps = {
+export type UserContext = {
     user: User | null;
-    error: Error | null;
-    logIn: (credentials: LogIn) => void;
-    logOut: () => void;
-    createUser: (credentials: SignUp) => void;
+    profile: UserProfile | undefined;
+}
+
+export type AuthContextProps = {
+    user: UserContext | null;
+    error: unknown | null;
+    logIn: (user: LogIn) => Promise<UserContext>
+    logOut: () => Promise<void>;
+    createUser: (user: SignUp, profile?: UserProfile) => Promise<UserContext>;
+    hasInitialized: boolean;
+    isLoading: boolean;
 };
+
+export type UserProfile = {
+    name?: string;
+    nickname?: string;
+    avatar?: string;
+}
